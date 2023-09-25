@@ -1,6 +1,6 @@
 from item import Item, Bullet
-from screen_init import screen
 import time
+from characters import Hero
 
 
 class Weapon(Item):
@@ -16,14 +16,13 @@ class Weapon(Item):
         self.bullets_spread = bullets_spread
         self.bullet_speed = bullet_speed
         self.last_shot_time = time.time()
-
-    # def draw(self):
-    #     screen.blit(self.image, (self.x, self.y))
+        self.current_cartridges_in_magazine = magazine_volume
+        self.start_reload_time = time.time()
 
 
 class Pistol(Weapon):
     def __init__(self, x, y, color, name, image_name):
-        super().__init__(x=x, y=y, size=(20, 20), color=color, name=name, damage=10, reload_speed=3, cooldown=0.333,
+        super().__init__(x=x, y=y, size=(20, 20), color=color, name=name, damage=10, reload_speed=1.5, cooldown=0.2,
                          magazine_volume=12, cartridges=24, bullets_spread=5, image_name=image_name, bullet_speed=10)
 
     def shoot(self, click: tuple):
@@ -32,6 +31,18 @@ class Pistol(Weapon):
 
     def check_cooldown(self, shot_time):
         return shot_time - self.last_shot_time >= self.cooldown
+
+    def reload(self):
+        tmp_cartridges = self.cartridges
+        self.cartridges -= min(self.magazine_volume - self.current_cartridges_in_magazine, self.cartridges)
+        self.current_cartridges_in_magazine += min(self.magazine_volume - self.current_cartridges_in_magazine, tmp_cartridges)
+
+    def check_reload(self):
+        return time.time() - self.start_reload_time >= self.reload_speed
+
+    def move_to(self, hero: Hero):
+        self.x = hero.x
+        self.y = hero.y
 
 
 class Shotgun(Weapon):

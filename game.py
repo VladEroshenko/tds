@@ -2,7 +2,7 @@ import pygame as pg
 import random
 import settings as st
 from screen_init import screen
-from particles import Particle, Field
+from particles import Field
 from characters import Hero, Enemy
 from item import Bullet
 from weapon import Pistol, Shotgun
@@ -18,7 +18,7 @@ enemies = [
 ]
 bullets = []
 weapons = [
-    Pistol(x=200, y=200, color=(0, 0, 0), name='pistol', image_name='images/pistol1.png'),
+    Pistol(x=hero.x, y=hero.y, color=(0, 0, 0), name='pistol', image_name='images/pistol1.png'),
     Shotgun(x=200, y=200, color=(0, 0, 0), name='shotgun', image_name='images/shotgun.png')]
 
 
@@ -38,24 +38,40 @@ while running:
     if keys[pg.K_2]:
         hero.current_weapon = 2
     weapons[hero.current_weapon-1].draw()
+    weapons[hero.current_weapon-1].move_to(hero)
     img = font.render(f'Weapon: {weapons[hero.current_weapon-1].name}', True, (255, 0, 0))
     screen.blit(img, (10, 10))
     img = font.render(f'HP: {hero.hp}', True, (255, 0, 0))
     screen.blit(img, (10, 50))
+    img = font.render(f'{weapons[0].current_cartridges_in_magazine}/{weapons[0].cartridges}', True, (255, 0, 0))
+    screen.blit(img, (130, 10))
     for enemy in enemies:
+        print(enemy.hp)
         enemy.draw()
         enemy.move_to(hero)
         if enemy.check_collision_with_hero(hero) and hero.hit_pause >= 100:
             hero.hp -= 1
             hero.hit_pause = 0
             #баг когда чел заходит в героя не отнимается хп
+        for bullet in bullets:
+            if enemy.check_collision_with_bullet(bullet):
+                enemy.hp = max(enemy.hp - bullet.damage, 0)
     if pg.mouse.get_pressed()[0]:
         mouse_pos = pg.mouse.get_pos()
-        if hero.current_weapon == 1 and weapons[0].check_cooldown(time.time()):
+        if hero.current_weapon == 1 and weapons[0].check_cooldown(time.time()) and weapons[0].current_cartridges_in_magazine > 0 and weapons[0].check_reload():
             bullets.extend(weapons[0].shoot(mouse_pos))
+            weapons[0].last_shot_time = time.time()
+            weapons[0].current_cartridges_in_magazine -= 1
         if hero.current_weapon == 2:
             bullets.append(Bullet(x=hero.x, y=hero.y, size=(10, 10), color=(0, 255, 0), image_name='images/bullet.png',
                     speed=weapons[1].bullet_speed, damage=weapons[1].damage, x_click=mouse_pos[0], y_click=mouse_pos[1]))
+    if weapons[0].cartridges > 0:
+        if keys[pg.K_r]:
+            weapons[0].reload()
+            weapons[0].start_reload_time = time.time()
+        if weapons[0].current_cartridges_in_magazine == 0:
+            weapons[0].reload()
+            weapons[0].start_reload_time = time.time()
     for bullet in bullets:
         bullet.draw()
         bullet.move()
@@ -72,10 +88,6 @@ while running:
     if keys[pg.K_s]:
         hero.y += hero.speed
     for event in pg.event.get():
-        # if event.type == pg.KEYDOWN:
-        #     print(f'Клавиша {event.key}, {pg.key.name(event.key)} нажата')
-        #     if event.key == pg.K_q:
-        #         print('Клавиша q нажата')
         if event.type == pg.QUIT:
             running = False
     hero.warm_up()
