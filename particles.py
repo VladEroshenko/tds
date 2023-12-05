@@ -22,7 +22,7 @@ class Field:
                 random.randint(0, st.MAP_WIDTH),
                 random.randint(0, st.MAP_HEIGHT),
                 random.randint(min_size, max_size),
-                (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                (127, 127, 127)
             ) for i in range(quantity)
         ]
 

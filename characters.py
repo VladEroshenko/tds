@@ -18,7 +18,7 @@ class Character:
 
 
 class Hero(Character):
-    def __init__(self, x, y, hp=10, speed=1, size=10, color=st.WHITE, cooldown=100, max_cooldown=100, hit_pause=100, max_hit_pause=100, current_weapon=1):
+    def __init__(self, x, y, hp=10, speed=1, size=(10, 10), color=st.WHITE, cooldown=100, max_cooldown=100, hit_pause=100, max_hit_pause=100, current_weapon=0, weapons=[]):
         super().__init__(x, y, hp, speed, size, color)
         self.cooldown = cooldown
         self.max_cooldown = max_cooldown
@@ -28,7 +28,7 @@ class Hero(Character):
 
 
     def draw(self):
-        pg.draw.rect(screen, self.color, (self.x, self.y, self.size, self.size))
+        pg.draw.rect(screen, self.color, (self.x, self.y, self.size[0], self.size[1]))
 
     def tp(self, x, y):
         self.x = x
@@ -58,10 +58,10 @@ class Enemy(Character):
         self.view_range = view_range
 
     def draw(self):
-        pg.draw.rect(screen, self.color, (self.x, self.y, self.size, self.size))
+        pg.draw.rect(screen, self.color, (self.x, self.y, self.size[0], self.size[1]))
 
-    def get_distance(self, another_obj: Hero):
-        return sqrt((self.x + self.size / 2 - another_obj.x + another_obj.size / 2) ** 2 + (self.y + self.size / 2 - another_obj.y + another_obj.size / 2) ** 2)
+    def get_distance(self, another_obj):
+        return sqrt((self.x + self.size[0] / 2 - another_obj.x + another_obj.size[0] / 2) ** 2 + (self.y + self.size[1] / 2 - another_obj.y + another_obj.size[1] / 2) ** 2)
 
     def move_to(self, another_obj: Hero):
         a = another_obj.x - self.x
@@ -74,7 +74,11 @@ class Enemy(Character):
             self.y += diff_y * self.speed
 
     def check_collision_with_hero(self, another_obj: Hero):
-        return self.get_distance(another_obj) < (self.size + another_obj.size) * sqrt(2) / 2
+        hypot1 = sqrt(self.size[0] ** 2 + self.size[1] ** 2)
+        hypot2 = sqrt(another_obj.size[0] ** 2 + another_obj.size[1] ** 2)
+        return self.get_distance(another_obj) < (hypot1 + hypot2) / 2
 
     def check_collision_with_bullet(self, another_obj):
-        return self.get_distance(another_obj) < (self.size + another_obj.size) * sqrt(2) / 2
+        hypot1 = sqrt(self.size[0] ** 2 + self.size[1] ** 2)
+        hypot2 = sqrt(another_obj.size[0] ** 2 + another_obj.size[1] ** 2)
+        return self.get_distance(another_obj) < (hypot1 + hypot2) / 2
