@@ -18,7 +18,7 @@ class Character:
 
 
 class Hero(Character):
-    def __init__(self, x, y, hp=10, speed=1, size=(10, 10), color=st.WHITE, cooldown=100, max_cooldown=100, hit_pause=100, max_hit_pause=100, current_weapon=0, weapons=[]):
+    def __init__(self, x, y, hp=10, speed=1.2, size=(10, 10), color=st.WHITE, cooldown=100, max_cooldown=100, hit_pause=100, max_hit_pause=100, current_weapon=0, weapons=[]):
         super().__init__(x, y, hp, speed, size, color)
         self.cooldown = cooldown
         self.max_cooldown = max_cooldown
@@ -50,6 +50,16 @@ class Hero(Character):
         if self.hit_pause > self.max_hit_pause:
             self.hit_pause = self.max_hit_pause
         self.hit_pause += 1
+
+    def move(self, direction):
+        if direction == 'left':
+            self.x -= self.speed
+        if direction == 'right':
+            self.x += self.speed
+        if direction == 'up':
+            self.y -= self.speed
+        if direction == 'down':
+            self.y += self.speed
 
 
 class Enemy(Character):
