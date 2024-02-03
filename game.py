@@ -9,6 +9,7 @@ from weapon import Pistol, Shotgun
 import time
 from spawner import Spawner
 from threading import Timer
+from bar import Bar
 
 
 hero = Hero(100, 100)
@@ -28,13 +29,13 @@ weapons = [
 ammoboxes = []
 available_ammo_boxes = ['pistol', 'shotgun']
 spawner = Spawner()
+bar = Bar(x=50, y=80, size=(150, 15), color=st.RED, percent=0)
 
 
 running = True
 clock = pg.time.Clock()
 font = pg.font.SysFont('impact', 24)
 available_fonts = pg.font.get_fonts()
-sound = pg.mixer.Sound('sounds/shot_pistol.mp3')
 flag = True
 
 
@@ -49,12 +50,15 @@ while running:
         hero.current_weapon = 0
     if keys[pg.K_2]:
         hero.current_weapon = 1
+    bar.draw()
     weapons[hero.current_weapon].draw()
     weapons[hero.current_weapon].move_to(hero)
     img = font.render(f'HP: {hero.hp}', True, (255, 0, 0))
     screen.blit(img, (10, 50))
     img = font.render(f'Weapon: {weapons[hero.current_weapon].name}', True, (255, 0, 0))
     screen.blit(img, (10, 10))
+    img = font.render('Ulta:', True, bar.color)
+    screen.blit(img, (10, 70))
     img = font.render(
         f'Cartridges: {weapons[hero.current_weapon].current_cartridges_in_magazine}/{weapons[hero.current_weapon].cartridges:<1}',
         True,
@@ -100,31 +104,17 @@ while running:
             ammoboxes.pop(i)
     if pg.mouse.get_pressed()[0]:
         mouse_pos = pg.mouse.get_pos()
-        if hero.current_weapon == 0 and weapons[0].check_cooldown(
-                time.time()) and weapons[0].current_cartridges_in_magazine > 0 and weapons[0].check_reload():
-            bullets.extend(weapons[0].shoot(mouse_pos))
-            weapons[0].last_shot_time = time.time()
-            weapons[0].current_cartridges_in_magazine -= 1
-            sound.play()
-        if hero.current_weapon == 1 and weapons[1].check_cooldown(
-                time.time()) and weapons[1].current_cartridges_in_magazine > 0 and weapons[1].check_reload():
-            bullets.extend(weapons[1].shoot(mouse_pos))
-            weapons[1].last_shot_time = time.time()
-            weapons[1].current_cartridges_in_magazine -= 1
-    if weapons[0].cartridges > 0:
-        if keys[pg.K_r]:
-            weapons[0].reload()
-            weapons[0].start_reload_time = time.time()
-        if weapons[0].current_cartridges_in_magazine == 0:
-            weapons[0].reload()
-            weapons[0].start_reload_time = time.time()
-    if weapons[1].cartridges > 0:
-        if keys[pg.K_r]:
-            weapons[1].reload()
-            weapons[1].start_reload_time = time.time()
-        if weapons[1].current_cartridges_in_magazine == 0:
-            weapons[1].reload()
-            weapons[1].start_reload_time = time.time()
+        for ind, weapon in enumerate(weapons):
+            if hero.current_weapon == ind and weapon.check_cooldown(
+                    time.time()) and weapon.current_cartridges_in_magazine > 0 and weapon.check_reload():
+                bullets.extend(weapon.shoot(mouse_pos))
+                weapon.last_shot_time = time.time()
+                weapon.current_cartridges_in_magazine -= 1
+    for weapon in weapons:
+        if weapon.cartridges > 0:
+            if keys[pg.K_r] or weapon.current_cartridges_in_magazine == 0:
+                weapon.reload()
+                weapon.start_reload_time = time.time()
     for bullet in bullets:
         bullet.draw()
         bullet.move()
@@ -150,7 +140,6 @@ while running:
         if event.type == pg.QUIT:
             running = False
     hero.warm_up()
-    print(enemies)
     pg.display.flip()
     clock.tick(st.FPS)
 pg.quit()
