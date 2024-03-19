@@ -4,6 +4,7 @@ from characters import Hero
 from math import sqrt, asin, degrees, radians, sin, cos
 import random
 import pygame as pg
+from utils import repeat_with_interval
 
 
 class Weapon(Item):
@@ -71,6 +72,10 @@ class Pistol(Weapon):
                        speed=self.bullet_speed, damage=self.damage, x_click=new_xys[0], y_click=new_xys[1],
                        angle=angle)]
 
+    def reload(self):
+        super().reload()
+        self.sounds['reload'].play()
+
 
 class Shotgun(Weapon):
     def __init__(self, x, y, color, name, image_name):
@@ -121,3 +126,34 @@ class Shotgun(Weapon):
                 Bullet(x=self.x, y=self.y, size=(10, 10), color=(0, 0, 0), image_name='images/bullet.png',
                        speed=self.bullet_speed, damage=self.damage, x_click=new_xys[2][0], y_click=new_xys[2][1],
                        angle=angle3)]
+
+    def reload(self):
+        tmp_cartridges = self.cartridges
+        self.cartridges -= min(self.magazine_volume - self.current_cartridges_in_magazine, self.cartridges)
+        reload_number = min(self.magazine_volume - self.current_cartridges_in_magazine, self.cartridges)
+        self.current_cartridges_in_magazine += min(self.magazine_volume - self.current_cartridges_in_magazine,
+                                                   tmp_cartridges)
+        repeat_with_interval(self.sounds['reload'].play, reload_number, self.sounds['reload'].get_length())
+
+        # for i in range(3):
+        #     t = Timer(0, self.sounds['reload'].play)
+        #     t.start()
+        #     t.join()
+        # min(self.magazine_volume - self.current_cartridges_in_magazine, self.cartridges)
+
+
+class Ulta:
+    def __init__(self, damage, distance, color):
+        self.damage = damage
+        self.distance = distance
+        self.color = color
+
+    def __call__(self, player, enemy_list):
+        s = []
+        for ind, enemy in enumerate(enemy_list):
+            if enemy.get_distance(player) <= self.distance:
+                s.append(ind)
+        return s
+
+    def cooldown(self):
+        self.color[2] -= 5

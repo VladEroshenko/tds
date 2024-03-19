@@ -92,3 +92,13 @@ class Enemy(Character):
         hypot1 = sqrt(self.size[0] ** 2 + self.size[1] ** 2)
         hypot2 = sqrt(another_obj.size[0] ** 2 + another_obj.size[1] ** 2)
         return self.get_distance(another_obj) < (hypot1 + hypot2) / 2
+
+
+class FastEnemy(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, hp=3, speed=2.5, size=(3, 3), color=st.RED, view_range=2000)
+
+
+class SlowEnemy(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, hp=100, speed=0.3, size=(20, 20), color=st.RED, view_range=2000)

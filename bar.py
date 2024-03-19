@@ -1,5 +1,6 @@
 import pygame as pg
 from screen_init import screen
+import settings as st
 
 
 class Bar:
@@ -11,7 +12,8 @@ class Bar:
         self.percent = percent
 
     def draw(self):
-        pg.draw.rect(screen, self.color, (self.x, self.y, self.size[0], self.size[1]), )
+        pg.draw.rect(screen, self.color, (self.x, self.y, self.size[0], self.size[1]), 2)
+        pg.draw.rect(screen, self.color, (self.x, self.y, self.size[0] * (self.percent / 100), self.size[1]))
 
-    def filling(self):
-        pass
+    def add(self, value):
+        self.percent = min(self.percent + value, 100)

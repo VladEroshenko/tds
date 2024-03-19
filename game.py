@@ -5,7 +5,7 @@ from screen_init import screen
 from particles import Field
 from characters import Hero, Enemy
 from item import AmmoBox
-from weapon import Pistol, Shotgun
+from weapon import Pistol, Shotgun, Ulta
 import time
 from spawner import Spawner
 from threading import Timer
@@ -29,7 +29,8 @@ weapons = [
 ammoboxes = []
 available_ammo_boxes = ['pistol', 'shotgun']
 spawner = Spawner()
-bar = Bar(x=50, y=80, size=(150, 15), color=st.RED, percent=0)
+bar = Bar(x=60, y=80, size=(150, 15), color=st.RED, percent=0)
+ulta = Ulta(damage=25, distance=100, color=[0, 0, 255])
 
 
 running = True
@@ -74,6 +75,12 @@ while running:
         # enemies = spawner.start_wave()
     elif len(enemies) > 0:
         flag = True
+    if keys[pg.K_e] and bar.percent == 100:
+        indexes = ulta(hero, enemies)
+        for i in indexes[::-1]:
+            enemies.pop(i)
+        bar.percent = 0
+        pg.draw.circle(screen, (0, 0, 255), (hero.x, hero.y), 100, 5)
     for enemy in enemies:
         enemy.draw()
         enemy.move_to(hero)
@@ -83,19 +90,20 @@ while running:
         for bullet in bullets:
             if enemy.check_collision_with_bullet(bullet):
                 enemy.hp = max(enemy.hp - bullet.damage, 0)
-                enemy.color = (enemy.color[0] - 10, enemy.color[1] + 10, 0)
+                enemy.color = (max(enemy.color[0] - 10, 0), min(enemy.color[1] + 10, 250), 0)
+                bar.add(1)
     for i in range(len(enemies) - 1, -1, -1):
         if enemies[i].hp <= 0:
             if random.randrange(0, 100) < st.AMMO_BOX_DROP_PROB:
                 box_type = random.choices(available_ammo_boxes, weights=(1, 1), k=1)[0]
-                ammoboxes.append(AmmoBox(x=enemies[i].x,
+                ammoboxes.append(AmmoBox(
+                        x=enemies[i].x,
                         y=enemies[i].y,
                         size=(15, 15),
                         color=(0, 0, 0),
                         image_name=f'images/ammobox_{box_type}.png',
                         ammo_type=box_type,
                         volume=weapons[available_ammo_boxes.index(box_type)].magazine_volume * st.AMMO_BOX_SIZE))
-
             enemies.pop(i)
     for i in range(len(ammoboxes) - 1, -1, -1):
         ammoboxes[i].draw()
@@ -112,13 +120,13 @@ while running:
                 weapon.current_cartridges_in_magazine -= 1
     for weapon in weapons:
         if weapon.cartridges > 0:
-            if keys[pg.K_r] or weapon.current_cartridges_in_magazine == 0:
+            if (keys[pg.K_r] and weapon.check_reload() and weapon.current_cartridges_in_magazine < weapon.magazine_volume) or weapon.current_cartridges_in_magazine == 0:
                 weapon.reload()
                 weapon.start_reload_time = time.time()
     for bullet in bullets:
         bullet.draw()
         bullet.move()
-    if keys[pg.K_e] and hero.is_ready_to_tp():
+    if keys[pg.K_f] and hero.is_ready_to_tp():
         window_width, window_height = screen.get_size()
         hero.tp(random.randint(0, window_width), random.randint(0, window_height))
         hero.reset_cooldown()
