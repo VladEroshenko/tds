@@ -157,3 +157,18 @@ class Ulta:
 
     def cooldown(self):
         self.color[2] -= 5
+
+
+class Mine(Item):
+    def __init__(self, x, y, size, image_name, damage, damage_radius, activation_radius):
+        super().__init__(x, y, size, image_name, color=(0, 0, 0))
+        self.damage = damage
+        self.damage_radius = damage_radius
+        self.activation_radius = activation_radius
+        self.activated = False
+
+    def activation(self, enemy_list):
+        if not self.activated:
+            for enemy in enemy_list:
+                if self.get_distance(enemy) <= self.activation_radius:
+                    self.activated = True
