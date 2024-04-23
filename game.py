@@ -5,7 +5,7 @@ from screen_init import screen
 from particles import Field
 from characters import Hero, Enemy
 from item import AmmoBox
-from weapon import Pistol, Shotgun, Ulta
+from weapon import Pistol, Shotgun, Ulta, Mine
 import time
 from spawner import Spawner
 from threading import Timer
@@ -31,6 +31,7 @@ available_ammo_boxes = ['pistol', 'shotgun']
 spawner = Spawner()
 bar = Bar(x=60, y=80, size=(150, 15), color=st.RED, percent=0)
 ulta = Ulta(damage=25, distance=100, color=[0, 0, 255])
+mines = []
 
 
 running = True
@@ -138,7 +139,19 @@ while running:
         hero.move('up')
     if keys[pg.K_s]:
         hero.move('down')
+    for i in range(len(mines) - 1, -1, -1):
+        mines[i].activation(enemies)
+        if mines[i].activated:
+            mines[i].boom(enemies)
+            mines.pop(i)
+        else:
+            mines[i].draw()
     for event in pg.event.get():
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_p:
+                mines.append(
+                    Mine(x=hero.x, y=hero.y, size=(10, 10), image_name='images/mina.png', damage=25, damage_radius=50,
+                         activation_radius=10))
         if event.type == pg.MOUSEWHEEL:
             hero.current_weapon -= event.y
             if hero.current_weapon >= len(weapons):

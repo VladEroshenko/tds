@@ -161,7 +161,7 @@ class Ulta:
 
 class Mine(Item):
     def __init__(self, x, y, size, image_name, damage, damage_radius, activation_radius):
-        super().__init__(x, y, size, image_name, color=(0, 0, 0))
+        super().__init__(x, y, size, color=(0, 0, 0), image_name='images/mina.png')
         self.damage = damage
         self.damage_radius = damage_radius
         self.activation_radius = activation_radius
@@ -172,3 +172,8 @@ class Mine(Item):
             for enemy in enemy_list:
                 if self.get_distance(enemy) <= self.activation_radius:
                     self.activated = True
+
+    def boom(self, enemy_list):
+        for enemy in enemy_list:
+            if self.get_distance(enemy) <= self.damage_radius:
+                enemy.hp -= self.damage
