@@ -73,6 +73,8 @@ while running:
     screen.blit(img, (10, 10))
     img = font.render('Ulta:', True, bar.color)
     screen.blit(img, (10, 70))
+    img = font.render(f'Wave: {spawner.wave}', True, (255, 0, 0))
+    screen.blit(img, (10, 90))
     img = font.render(
         f'Cartridges: {weapons[hero.current_weapon].current_cartridges_in_magazine}/{weapons[hero.current_weapon].cartridges:<1}',
         True,
@@ -152,10 +154,11 @@ while running:
             mines[i].draw()
     for event in pg.event.get():
         if event.type == pg.KEYDOWN and hero.health_check():
-            if event.key == pg.K_p:
+            if event.key == pg.K_p and hero.mines > 0:
                 mines.append(
                     Mine(x=hero.x, y=hero.y, size=(10, 10), image_name='images/mina.png', damage=25, damage_radius=50,
                          activation_radius=10))
+                hero.mines -= 1
         if event.type == pg.MOUSEWHEEL and hero.health_check():
             hero.current_weapon -= event.y
             if hero.current_weapon >= len(weapons):

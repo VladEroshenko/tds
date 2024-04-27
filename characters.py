@@ -18,13 +18,14 @@ class Character:
 
 
 class Hero(Character):
-    def __init__(self, x, y, hp=10, speed=1.2, size=(10, 10), color=st.WHITE, cooldown=100, max_cooldown=100, hit_pause=100, max_hit_pause=100, current_weapon=0, weapons=[]):
+    def __init__(self, x, y, hp=10, speed=1.2, size=(10, 10), color=st.WHITE, cooldown=100, max_cooldown=100, hit_pause=100, max_hit_pause=100, current_weapon=0, mines=10):
         super().__init__(x, y, hp, speed, size, color)
         self.cooldown = cooldown
         self.max_cooldown = max_cooldown
         self.hit_pause = hit_pause
         self.max_hit_pause = max_hit_pause
         self.current_weapon = current_weapon
+        self.mines = mines
 
 
     def draw(self):
