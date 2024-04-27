@@ -62,6 +62,7 @@ class Hero(Character):
             self.y += self.speed
 
 
+
 class Enemy(Character):
     def __init__(self, x, y, hp, speed, size, color, view_range):
         super().__init__(x, y, hp, speed, size, color)

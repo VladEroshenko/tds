@@ -48,6 +48,18 @@ while running:
     keys = pg.key.get_pressed()
     if hero.health_check():
         hero.draw()
+        if keys[pg.K_a]:
+            hero.move('left')
+        if keys[pg.K_d]:
+            hero.move('right')
+        if keys[pg.K_w]:
+            hero.move('up')
+        if keys[pg.K_s]:
+            hero.move('down')
+    else:
+        img = font.render('You lose!', True, (255, 0, 0))
+        screen.blit(img, (1140, 600))
+        hero.hp = 0
     if keys[pg.K_1]:
         hero.current_weapon = 0
     if keys[pg.K_2]:
@@ -111,7 +123,7 @@ while running:
         if ammoboxes[i].check_collision_with_hero(hero):
             weapons[available_ammo_boxes.index(ammoboxes[i].ammo_type)].cartridges += ammoboxes[i].volume
             ammoboxes.pop(i)
-    if pg.mouse.get_pressed()[0]:
+    if pg.mouse.get_pressed()[0] and hero.health_check():
         mouse_pos = pg.mouse.get_pos()
         for ind, weapon in enumerate(weapons):
             if hero.current_weapon == ind and weapon.check_cooldown(
@@ -131,14 +143,6 @@ while running:
         window_width, window_height = screen.get_size()
         hero.tp(random.randint(0, window_width), random.randint(0, window_height))
         hero.reset_cooldown()
-    if keys[pg.K_a]:
-        hero.move('left')
-    if keys[pg.K_d]:
-        hero.move('right')
-    if keys[pg.K_w]:
-        hero.move('up')
-    if keys[pg.K_s]:
-        hero.move('down')
     for i in range(len(mines) - 1, -1, -1):
         mines[i].activation(enemies)
         if mines[i].activated:
@@ -147,12 +151,12 @@ while running:
         else:
             mines[i].draw()
     for event in pg.event.get():
-        if event.type == pg.KEYDOWN:
+        if event.type == pg.KEYDOWN and hero.health_check():
             if event.key == pg.K_p:
                 mines.append(
                     Mine(x=hero.x, y=hero.y, size=(10, 10), image_name='images/mina.png', damage=25, damage_radius=50,
                          activation_radius=10))
-        if event.type == pg.MOUSEWHEEL:
+        if event.type == pg.MOUSEWHEEL and hero.health_check():
             hero.current_weapon -= event.y
             if hero.current_weapon >= len(weapons):
                 hero.current_weapon = 0
